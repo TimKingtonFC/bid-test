@@ -1,0 +1,127 @@
+<!-- http://hyperweb.space/#!/project/roan-wyrm -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>BridgeGrinder</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="hand.css" />
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css" />
+    
+    <script type="text/javascript" src="jquery-2.1.4.min.js"></script>
+    <script
+      src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+      integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+      crossorigin="anonymous"></script>
+    <script type="text/javascript" src="knockout-3.4.0.js"></script>
+    <script type="text/javascript" src="underscore-min.js"></script>
+  </head>
+<body>
+
+<div id="main">
+<table class="history">
+  <tbody>
+    <tr>
+      <th data-bind="css: nsVulnerable() ? 'vulnerable' : 'nonvulnerable'">North</th>
+      <th data-bind="css: ewVulnerable() ? 'vulnerable' : 'nonvulnerable'">East</th>
+      <th data-bind="css: nsVulnerable() ? 'vulnerable' : 'nonvulnerable'">South</th>
+      <th data-bind="css: ewVulnerable() ? 'vulnerable' : 'nonvulnerable'">West</th>
+    </tr>
+    <!-- ko foreach: bidsMadeRows -->
+    <tr>
+      <!-- ko foreach: new Array(numPlaceholders) -->
+      <td></td>
+      <!-- /ko -->
+      <!-- ko foreach: bids -->
+      <td>
+        <a class="explore" href="#" data-bind="attr: { index: index }">
+          <!-- ko if: isBid -->
+          <span class="call"><span class="level" data-bind="text: level" ></span><span class="strain" data-bind="css: strainName, text: strainSymbol"></span></span>
+          <!-- /ko -->
+          <!-- ko ifnot: isBid -->
+          <span class="call" data-bind="text: bidText"></span>
+          <!-- /ko -->
+        </a>
+      </td>
+      <!-- /ko -->
+    </tr>
+    <!-- /ko -->
+  </tbody>
+</table>
+
+<div class="hand cardhand" data-bind="visible: !doneBidding(), foreach: myHandSuitGroups"><div class="suitgroup" data-bind="css: suitName, foreach: cards"><span class="rank" data-bind="text: rank"></span></div>
+</div>
+
+<table class="bidbox" data-bind="visible: !doneBidding()">
+  <tr class="specialbids">
+    <td class="callcard" id="redouble" data-bind="style: { visibility: canRedouble() ? 'visible' : 'hidden' }"><span class="call">X X</span></td>
+    <td class="callcard" id="pass" style="visibility: visible;" data-bind="attr: { colspan: 3 }">
+      <span class="call">P A S S</span>
+    </td>
+    <td class="callcard" id="double" data-bind="style: { visibility: canDouble() ? 'visible' : 'hidden' }">
+      <span class="call">X</span>
+    </td>
+  </tr>
+
+  <!-- ko foreach: availableLevels -->
+  <tr class="levelrow">
+    <!-- ko foreach: new Array(numPlaceholders) -->
+    <td class="callcard" style="visibility: hidden">
+    </td>
+    <!-- /ko -->
+
+    <!-- ko foreach: bids -->
+    <td class="callcard" data-bind="style: { visibility: 'visible' }, attr: { strain: strain, level: level }">
+      <span class="call"><span data-bind="text: level"></span><span class="strain" data-bind="css: strainName, text: strainSymbol"></span></span>
+    </td>
+    <!-- /ko -->
+  </tr>
+  <!-- /ko -->
+</table>
+  
+<div data-bind="visible: doneBidding()">
+  HCP: <input type="number" class="min-hcp shortnum"/>-<input type="number" class="max-hcp shortnum"/><br/>
+  Spades: <input type="number" class="min-s shortnum"/>-<input type="number" class="max-s shortnum"/><br/>
+  Hearts: <input type="number" class="min-h shortnum"/>-<input type="number" class="max-h shortnum"/><br/>
+  Diamonds: <input type="number" class="min-d shortnum"/>-<input type="number" class="max-d shortnum"/><br/>
+  Clubs: <input type="number" class="min-c shortnum"/>-<input type="number" class="max-c shortnum"/><br/>
+  
+  <div class="button checknotes">check</div>
+</div>
+
+<table class="deal" data-bind="visible: myHandScored()">
+  <tbody data-bind="foreach: handRows">
+    <tr data-bind="foreach: hands">
+      <td>
+        <!-- ko if: suits -->
+        <div class="position">
+          <div class="hand listhand" data-bind="foreach: suits">
+            <div class="suitgroup" data-bind="css: suitName">
+              <span class="rank"><!-- ko foreach: cards --><!-- ko text: rank --><!-- /ko --><!-- /ko --></span>
+            </div>
+          </div>
+        </div>
+        <!-- /ko -->
+        <!-- ko if: center -->
+        <table class="positionlabels">
+          <tbody>
+            <tr><td></td><td>N</td><td></td></tr>
+            <tr><td>W</td><td></td><td>E</td></tr>
+            <tr><td></td><td>S</td><td></td></tr>
+          </tbody>
+        </table>
+        <!-- /ko -->
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="button nexthand" data-bind="visible: master() && myHandScored() && partnerScored()">next hand</div>
+<div data-bind="visible: myHandScored() && !partnerScored()">Waiting for partner...</div>
+
+</div>
+
+<script src="main.js"></script>
+
+</body>
+</html>

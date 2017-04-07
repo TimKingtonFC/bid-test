@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>BridgeGrinder</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="hand.css" />
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css" />
+    
+    <script type="text/javascript" src="jquery-2.1.4.min.js"></script>
+    <script
+      src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+      integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+      crossorigin="anonymous"></script>
+    <script type="text/javascript" src="knockout-3.4.0.js"></script>
+    <script type="text/javascript" src="underscore-min.js"></script>
+    <script>
+        $('document').ready(function() {
+          console.log('I am here');
+          $( '#tagName' ).autocomplete({
+            source: '/tags'
+          });
+        });
+    </script>
+  </head>
+<body>
+  <label for="tagName">Tag Name:</label><input type="text" id="tagName"/>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Tag Administration</title>
+    <!-- JQuery -->
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css" />
+    <script src="//code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="//getbootstrap.com/examples/dashboard/dashboard.css" />
+<!--     <script src="//cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js" integrity="sha256-PX9zWVaICUCeklczWaS9DLBb9uGN7pCkCT0Kyz1elRo=" crossorigin="anonymous"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-debug.js" integrity="sha256-sz3IPtwHtumV/43Q7I4ldWQhuOlBiwIi5uigqzDQyoo=" crossorigin="anonymous"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js" integrity="sha256-obZACiHd7gkOk9iIL/pimWMTJ4W/pBsKu+oZnSeBIek=" crossorigin="anonymous"></script>
+    
+    <style>
+        /* Start by setting display:none to make this hidden.
+         Then we position it in relation to the viewport window
+         with position:fixed. Width, height, top and left speak
+         for themselves. Background we set to 80% white with
+         our animation centered, and no-repeating */
+      .modal {
+          display:    none;
+          position:   fixed;
+          z-index:    1000;
+          top:        0;
+          left:       0;
+          height:     100%;
+          width:      100%;
+          background: rgba( 255, 255, 255, .8 ) 
+                      url('//i.stack.imgur.com/FhHRx.gif') 
+                      50% 50% 
+                      no-repeat;
+      }
+
+      /* When the body has the loading class, we turn
+         the scrollbar off with overflow:hidden */
+      body.loading {
+          overflow: hidden;   
+      }
+
+      /* Anytime the body has the loading class, our
+         modal element will be visible */
+      body.loading .modal {
+          display: block;
+      }
+    </style>
+    
+    <script>
+      var MyViewModel = function() {
+        var self = this;
+        self.tags = ko.observableArray();
+        self.messages = ko.observableArray();
+        self.tagName = ko.observable();
+        
+        self.hasMessages = function() {
+          return self.messages.length > 0;
+        }
+        
+        self.search = function() {
+          var url = '/tags';
+          
+          var tagName = self.tagName();
+          if( tagName ) {
+            url += '?';
+            url += $.param({ term: tagName });
+          }
+          
+          $.get( url, function(data) {
+            self.tags.removeAll();
+            if( data.length > 0 ) {
+              _.each( data, function( tag ) {  self.tags.push( tag ); } );  
+            } else {
+              self.messages.removeAll();
+              self.messages.push('No tags found.');
+            }
+            
+          });
+        }
+        
+        self.addTag = function() {
+          var tagName = self.tagName();
+          
+          if( tagName ) {
+            $.post( '/tags/' + tagName, function( data ) {
+              if( data.success ) {
+                self.messages.removeAll();
+                self.messages.push( 'Success' );
+                self.search();
+
+              } else {
+                self.messages.removeAll();
+                self.messages.push( 'Error: ' + data.message );
+              }
+            });
+          } else {
+            self.messages.removeAll();
+            self.messages.push('You must provide a tag name');
+          }
+        }
+        
+        self.removeTag = function( ) {
+          var tagName = this;
+          
+          var response = confirm('Are you sure you want to delete the "' + tagName + '" tag?');
+          
+          if( response == true ) {
+            $.ajax({
+              method: 'DELETE'
+              , url: '/tags/' + tagName
+              , success: function( data ) {
+                if( data.success ) {
+                  self.messages.removeAll();
+                  self.messages.push( 'Success' );
+                  self.search();
+                } else {
+                  self.messages.removeAll();
+                  self.messages.push( 'Error: ' + data.message );                
+                }
+              }
+            })
+          }
+        }
+      };
+      
+      var model = new MyViewModel();
+      
+      $( document ).ready(function() {
+        var body = $( 'body' );
+        
+        $( document ).on({
+          ajaxStart: function() { body.addClass("loading"); }
+          , ajaxStop: function() { body.removeClass("loading"); }
+        });
+        
+        ko.applyBindings( model );
+      });
+    </script>
+  </head>  
+  <body>
+    <div class="modal"></div>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">Tag Administration</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+<!--             <li><a href="/">Home</a></li> -->
+          </ul>
+        </div>
+      </div>
+    </nav>
+    
+    <div class="container-fluid">
+      <div class="row">
+        <!-- SIDEBAR -->
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li><a href="/">Hands</a></li>
+            <li class="active"><a href="/tags/admin">Tags</a></li>
+          </ul>
+        </div>
+        <!-- MAIN -->
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h1 class="page-header">Tags</h1>
+          <div id="messages" class="row" data-bind="visible: hasMessages">
+            <ul class="ui-state-error" data-bind="foreach: messages">
+              <li data-bind="text: $data"></li>
+            </ul>
+          </div>
+          <form id="frmTag">
+            <div class="row">
+              <div class="col-md-6">
+                <input type="text" id="xtagName" class="form-control" data-bind="value: tagName" placeholder="Enter a tag name" />
+              </div>
+              <div class="col-md-1">
+                <button id="btnSearch" class="btn btn-default" data-bind="click: search">Search</button>
+              </div>
+              <div class="col-md-1">
+                <button id="btnAdd" class="btn" data-bind="click: addTag">Add</button>
+              </div>
+            </div>
+            <div class="row">
+              <table class="table table-striped">
+                <thead>
+                </thead>
+                <tbody data-bind="foreach: tags">
+                  <tr>
+                    <td data-bind="text: $data"></td>
+                    <td><button data-bind="click: $parent.removeTag">Delete</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
