@@ -1,0 +1,29 @@
+{
+  "name": "bridgegrinder",
+  "description": "BridgeGrinder",
+  "version": "0.0.1",
+	"main": "server.js",
+	"scripts": {
+		"start": "node server.js"
+	},
+	"dependencies": {
+    "express": "^4.12.4",
+    "express-ws": "^3.0.0",
+    "body-parser": "1.12.x",
+    "cors": "2.5.x",
+    "node-json-db": "0.6.x"
+	},
+	"engines": {
+		"node": "4.5"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/heroku/node-js-getting-started"
+	},
+	"keywords": [
+		"node",
+		"hyperdev",
+		"express"
+	],
+	"license": "MIT"
+}
